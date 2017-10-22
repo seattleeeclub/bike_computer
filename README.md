@@ -17,13 +17,13 @@ Project Location: bike_computer/source/stm32f429/cube/bike_computer
 Supporting Files/Components: same heirarchial level as "cube" folder.  FreeRTOS and simplehsm at same level as Source
 
 Using the Cube Tool, we need at least the following peripherals initialized:
--User Buttons (3, configured as interrupts, with cooresponding rtos task)
--User LEDS (Debug + Extras, visual indicators, use the two on board leds for now)
--LCD Peripheral (config as 2 layer, map to sdram memory locations, set frame buffer size to window size)
--SDRAM Peripheral (follow along with standard libs example to configure this)
--UART (GPS - the one from Sparkfun outputs set of lat/lng every second)
--SPI (sdcard - control sdcard via spi interface.  Following along with recommended init proceedure from FatFS site)
--USB (control via terminal)
+- User Buttons (3, configured as interrupts, with cooresponding rtos task)
+- User LEDS (Debug + Extras, visual indicators, use the two on board leds for now)
+- LCD Peripheral (config as 2 layer, map to sdram memory locations, set frame buffer size to window size)
+- SDRAM Peripheral (follow along with standard libs example to configure this)
+- UART (GPS - the one from Sparkfun outputs set of lat/lng every second)
+- SPI (sdcard - control sdcard via spi interface.  Following along with recommended init proceedure from FatFS site)
+- USB (control via terminal)
 
 
 
