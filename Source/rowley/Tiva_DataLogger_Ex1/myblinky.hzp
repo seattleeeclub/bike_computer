@@ -1,0 +1,211 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="DK_TM4C123G" target="8" version="2">
+  <project Name="Example">
+    <configuration
+      Name="Common"
+      Placement="Flash"
+      Target="TM4C123GH6PGE"
+      arm_architecture="v7EM"
+      arm_core_type="Cortex-M4"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_gcc_target="arm-unknown-eabi"
+      arm_library_optimization="Small"
+      arm_linker_heap_size="0"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="4096"
+      arm_simulator_memory_simulation_filename="$(TargetsDir)/TIVA/TIVASimulatorMemory.dll"
+      arm_simulator_memory_simulation_parameter="TM4C123GH6PGE;0x40000;0x8000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_loader_applicable_loaders="Flash"
+      arm_target_loader_default_loader="Flash"
+      arm_target_restrict_memory_accesses="No"
+      c_preprocessor_definitions="STARTUP_FROM_RESET;TARGET_IS_BLIZZARD_RB1;PART_TM4C123GH6PGE;gcc"
+      c_user_include_directories="$(TargetsDir)/TIVA/Include;$(TargetsDir)/CMSIS_3/CMSIS/Include;.;..;$(TIVAWARE);././Tiva_Libraries;./board;./FreeRTOS;./Tasks;./commandline;./sensors;./display;./sdcard;./simplehsm;./hsm;../../../FreeRTOS/Source;../../../FreeRTOS/Source/include;../../../FreeRTOS/Source/portable/GCC/ARM_CM3"
+      debug_register_definition_file="$(TargetsDir)/TIVA/TM4C123GH6PGE.svd_Peripherals.xml"
+      default_vector_section=".vectors"
+      link_include_standard_libraries="Yes"
+      linker_memory_map_file="$(TargetsDir)/TIVA/TM4C123GH6PGE_MemoryMap.xml"
+      linker_printf_fmt_level="long"
+      linker_printf_fp_enabled="No"
+      linker_scanf_fmt_level="long"
+      linker_scanf_fp_enabled="No"
+      linker_section_placement_file="$(StudioDir)/targets/Cortex_M/flash_placement.xml"
+      macros="FAMILY=TM4C123"
+      project_type="Executable"
+      property_groups_file_path="$(TargetsDir)/TIVA/propertyGroups.xml"
+      target_get_partname_script="GetPartName()"
+      target_match_partname_script="MatchPartName(&quot;$(Target)&quot;)"
+      target_reset_script="Reset()"
+      target_script_file="$(TargetsDir)/TIVA/TIVA_Target.js" />
+    <configuration
+      Name="Release"
+      c_preprocessor_definitions="STARTUP_FROM_RESET" />
+    <folder Name="Source Files">
+      <configuration Name="Common" filter="c;cpp;cxx;cc;h;s;asm;inc" />
+      <file file_name="main.c" />
+      <file file_name="main.h" />
+    </folder>
+    <folder Name="driverlib Files">
+      <file file_name="../Tiva_Libraries/adc.c" />
+      <file file_name="../Tiva_Libraries/aes.c" />
+      <file file_name="../Tiva_Libraries/can.c" />
+      <file file_name="../Tiva_Libraries/comp.c" />
+      <file file_name="../Tiva_Libraries/cpu.c" />
+      <file file_name="../Tiva_Libraries/crc.c" />
+      <file file_name="../Tiva_Libraries/des.c" />
+      <file file_name="../Tiva_Libraries/eeprom.c" />
+      <file file_name="../Tiva_Libraries/emac.c" />
+      <file file_name="../Tiva_Libraries/epi.c" />
+      <file file_name="../Tiva_Libraries/flash.c" />
+      <file file_name="../Tiva_Libraries/fpu.c" />
+      <file file_name="../Tiva_Libraries/gpio.c" />
+      <file file_name="../Tiva_Libraries/hibernate.c" />
+      <file file_name="../Tiva_Libraries/i2c.c" />
+      <file file_name="../Tiva_Libraries/interrupt.c" />
+      <file file_name="../Tiva_Libraries/mpu.c" />
+      <file file_name="../Tiva_Libraries/onewire.c" />
+      <file file_name="../Tiva_Libraries/pwm.c" />
+      <file file_name="../Tiva_Libraries/qei.c" />
+      <file file_name="../Tiva_Libraries/shamd5.c" />
+      <file file_name="../Tiva_Libraries/ssi.c" />
+      <file file_name="../Tiva_Libraries/sw_crc.c" />
+      <file file_name="../Tiva_Libraries/sysctl.c" />
+      <file file_name="../Tiva_Libraries/sysexc.c" />
+      <file file_name="../Tiva_Libraries/systick.c" />
+      <file file_name="../Tiva_Libraries/timer.c" />
+      <file file_name="../Tiva_Libraries/uart.c" />
+      <file file_name="../Tiva_Libraries/udma.c" />
+      <file file_name="../Tiva_Libraries/usb.c" />
+      <file file_name="../Tiva_Libraries/watchdog.c" />
+    </folder>
+    <configuration
+      Name="Flash"
+      arm_target_flash_loader_file_path="$(TargetsDir)/TIVA/Release/Loader.elf"
+      target_reset_script="FLASHReset()" />
+    <folder Name="System Files">
+      <file file_name="$(StudioDir)/source/thumb_crt0.s" />
+      <file file_name="$(TargetsDir)/TIVA/TIVA_Startup.s" />
+      <file file_name="$(TargetsDir)/TIVA/Source/system_$(FAMILY).c" />
+    </folder>
+    <folder Name="hardware">
+      <file file_name="board/gpio_driver.c" />
+      <file file_name="board/gpio_driver.h" />
+      <file file_name="board/uart_driver.c" />
+      <file file_name="board/uart_driver.h" />
+      <file file_name="board/spi_driver.c" />
+      <file file_name="board/spi_driver.h" />
+      <file file_name="board/timer_driver.c" />
+      <file file_name="board/timer_driver.h" />
+    </folder>
+    <folder Name="FreeRTOS Portable">
+      <file file_name="../../../FreeRTOS/Source/portable/GCC/ARM_CM3/port.c" />
+      <file file_name="../../../FreeRTOS/Source/portable/GCC/ARM_CM3/portmacro.h" />
+    </folder>
+    <folder Name="FreeRTOS Core">
+      <file file_name="../../../FreeRTOS/Source/croutine.c" />
+      <file file_name="../../../FreeRTOS/Source/event_groups.c" />
+      <file file_name="../../../FreeRTOS/Source/list.c" />
+      <file file_name="../../../FreeRTOS/Source/queue.c" />
+      <file file_name="../../../FreeRTOS/Source/tasks.c" />
+      <file file_name="../../../FreeRTOS/Source/timers.c" />
+    </folder>
+    <folder Name="FreeRTOS Include">
+      <file file_name="../../../FreeRTOS/Source/include/croutine.h" />
+      <file file_name="../../../FreeRTOS/Source/include/deprecated_definitions.h" />
+      <file file_name="../../../FreeRTOS/Source/include/event_groups.h" />
+      <file file_name="../../../FreeRTOS/Source/include/FreeRTOS.h" />
+      <file file_name="../../../FreeRTOS/Source/include/list.h" />
+      <file file_name="../../../FreeRTOS/Source/include/mpu_prototypes.h" />
+      <file file_name="../../../FreeRTOS/Source/include/mpu_wrappers.h" />
+      <file file_name="../../../FreeRTOS/Source/include/portable.h" />
+      <file file_name="../../../FreeRTOS/Source/include/projdefs.h" />
+      <file file_name="../../../FreeRTOS/Source/include/queue.h" />
+      <file file_name="../../../FreeRTOS/Source/include/semphr.h" />
+      <file file_name="../../../FreeRTOS/Source/include/StackMacros.h" />
+      <file file_name="../../../FreeRTOS/Source/include/stdint.readme" />
+      <file file_name="../../../FreeRTOS/Source/include/task.h" />
+      <file file_name="../../../FreeRTOS/Source/include/timers.h" />
+    </folder>
+    <folder Name="FreeRTOS User">
+      <file file_name="FreeRTOS/FreeRTOSConfig.h" />
+      <file file_name="FreeRTOS/FreeRTOSTick.c" />
+      <file file_name="FreeRTOS/FreeRTOSTick.h" />
+      <file file_name="FreeRTOS/heap_1.c" />
+      <file file_name="FreeRTOS/Priorities.h" />
+      <file file_name="FreeRTOS/RunTimeStats.c" />
+      <file file_name="FreeRTOS/RunTimeStats.h" />
+    </folder>
+    <folder Name="FreeRTOS Tasks">
+      <file file_name="Tasks/LedTask.c" />
+      <file file_name="Tasks/LedTask.h" />
+      <file file_name="Tasks/ComTask.c" />
+      <file file_name="Tasks/ComTask.h" />
+      <file file_name="Tasks/ButtonTask.c" />
+      <file file_name="Tasks/ButtonTask.h" />
+      <file file_name="Tasks/DisplayTask.c" />
+      <file file_name="Tasks/DisplayTask.h" />
+    </folder>
+    <folder Name="commandline">
+      <file file_name="commandline/CommandHandlers.c" />
+      <file file_name="commandline/CommandHandlers.h" />
+      <file file_name="commandline/console.c" />
+      <file file_name="commandline/console.h" />
+      <file file_name="commandline/ConsoleCommands.c" />
+      <file file_name="commandline/ConsoleCommands.h" />
+    </folder>
+    <folder Name="sensors">
+      <file file_name="sensors/gpsGP20U7.c" />
+      <file file_name="sensors/gpsGP20U7.h" />
+    </folder>
+    <folder Name="display">
+      <file file_name="display/font.c" />
+      <file file_name="display/font.h" />
+      <file file_name="display/lcd_driver.c" />
+      <file file_name="display/lcd_driver.h" />
+      <file file_name="display/offset.c" />
+      <file file_name="display/offset.h" />
+    </folder>
+    <folder Name="sdcard">
+      <file file_name="sdcard/diskio.c" />
+      <file file_name="sdcard/diskio.h" />
+      <file file_name="sdcard/ff.c" />
+      <file file_name="sdcard/ff.h" />
+      <file file_name="sdcard/ffconf.h" />
+      <file file_name="sdcard/ffunicode.c" />
+      <file file_name="sdcard/integer.h" />
+      <file file_name="sdcard/sdcard_driver.c" />
+      <file file_name="sdcard/sdcard_driver.h" />
+    </folder>
+    <folder Name="simplehsm">
+      <file file_name="simplehsm/simplehsm.c" />
+      <file file_name="simplehsm/simplehsm.h" />
+    </folder>
+    <folder Name="hsm">
+      <file file_name="hsm/HSM_Menu.c" />
+      <file file_name="hsm/HSM_Menu.h" />
+    </folder>
+  </project>
+  <configuration Name="THUMB Debug" inherited_configurations="THUMB;Debug" />
+  <configuration
+    Name="THUMB"
+    Platform="ARM"
+    arm_instruction_set="Thumb"
+    arm_library_instruction_set="Thumb"
+    c_preprocessor_definitions="__THUMB"
+    hidden="Yes" />
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG"
+    gcc_debugging_level="Level 3"
+    gcc_optimization_level="None"
+    hidden="Yes" />
+  <configuration
+    Name="THUMB Release"
+    inherited_configurations="THUMB;Release" />
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_debugging_level="Level 1"
+    gcc_optimization_level="Level 1"
+    hidden="Yes" />
+</solution>
