@@ -11,10 +11,10 @@ Photo of Original Prototype
 
 Updated Version
 ---------------
-The new / continued version will be built on the STM32F429 Discovery board.  The board contains a full color, 320x240 display integrated into the board, so less soldering is required to built it.  Additional hardware includes user buttons and an sdcard holder (user your favorite one, but the one from Sparkfun looks pretty good).  Although the disco board has SDIO capability, the sdcard will be controlled using SPI interface (SDIO pins consumed from LCD controller).  Low level hardware drivers are developed using the STM Cube tool.  Top level control uses FreeRTOS.
-Project is built using TrueStudio and auto-gen code from STMCube software.
+The new / continued version will be built on the STM32F429 Discovery board.  The board contains a full color, 320x240 display integrated into the board, so less soldering is required to built it.  Additional hardware includes user buttons and an sdcard holder (use your favorite one, but the one from Sparkfun looks pretty good).  Although the disco board has SDIO capability, the sdcard will be controlled using SPI interface (SDIO pins consumed from LCD controller).  Low level hardware driver files are developed using the STM Cube tool.  Top level control uses FreeRTOS.
+Project is built using TrueStudio 8.0 and auto-gen code from STCubeMX software (Version 4.22.1, Firmware Version 1.16).
 Project Location: bike_computer/source/stm32f429/cube/bike_computer
-Supporting Files/Components: same heirarchial level as "cube" folder.  FreeRTOS and simplehsm at same level as Source
+Supporting Files/Components: same heirarchial level as "cube" folder.  FreeRTOS and simplehsm (menu structure) at same level as Source
 
 Using the Cube Tool, we need at least the following peripherals initialized:
 - User Buttons (3, configured as interrupts, with cooresponding rtos task)
@@ -25,5 +25,6 @@ Using the Cube Tool, we need at least the following peripherals initialized:
 - SPI (sdcard - control sdcard via spi interface.  Following along with recommended init proceedure from FatFS site)
 - USB (control via terminal)
 
-
+First Build - Hello
+![alt text](https://github.com/seattleeeclub/bike_computer/blob/master/photos_hardware/stm32f429/stm32_bikecomputer1.jpg)
 
