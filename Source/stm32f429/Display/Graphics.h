@@ -66,15 +66,27 @@ Layer addresses defined in Memory.h
 extern uint32_t colorPalletRGB332[256];
 extern uint32_t colorPalletRGB323[256];
 
+/////////////////////////////////////////
+//Font color
+#define DEFAULT_TEXT_LINE_COLOR 	WHITE
+#define DEFAULT_TEXT_BACK_COLOR 	BLACK
+
+
 /////////////////////////////////////////////////
 //function prototypes
+
+void LCD_SetTextLineColor(uint16_t color);
+void LCD_SetTextBackColor(uint16_t color);
+uint16_t LCD_GetTextLineColor(uint16_t color);
+uint16_t LCD_GetTextBackColor(uint16_t color);
 
 uint8_t LCD_GetRGB332PalletValue(uint16_t color);
 void LCD_Clear(uint8_t layer, uint16_t color);
 void LCD_PutPixel(uint8_t layer, uint16_t x, uint16_t y, uint16_t color);       //sets bit low at x,y
 void LCD_DrawLine(uint8_t layer, int x0, int y0, int x1, int y1, uint16_t color);
 void LCD_DrawRadius(uint8_t layer, int x0, int y0, int length, int angle, uint16_t color);
-void LCD_RotateBuffer(uint8_t* source, uint8_t* destination, uint16_t angle, int xc, int yc);
+void LCD_RotateBuffer(uint32_t sourceLayer, uint32_t destinationLayer, uint16_t angle, int xc, int yc);
+
 
 //text functions - 16x24 characters
 void LCD_DrawChar(uint8_t layer, uint8_t row, uint8_t col, uint8_t letter);

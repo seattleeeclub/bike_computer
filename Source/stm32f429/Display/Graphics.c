@@ -28,6 +28,10 @@ a single pixel.
 #include "ltdc.h"
 #include "Memory.h"
 
+uint16_t m_lcdTextLineColor = DEFAULT_TEXT_LINE_COLOR;
+uint16_t m_lcdTextBackColor = DEFAULT_TEXT_BACK_COLOR;
+
+
 uint32_t colorPalletRGB332[256] =
 {
 	0x000000, 0x000055, 0x0000AA, 0x0000FF,
@@ -164,6 +168,28 @@ uint32_t colorPalletRGB323[256] =
 	0xFFFF91, 0xFFFFB6, 0xFFFFDA, 0xFFFFFF
 };
 
+
+void LCD_SetTextLineColor(uint16_t color)
+{
+	m_lcdTextLineColor = color;
+}
+
+void LCD_SetTextBackColor(uint16_t color)
+{
+	m_lcdTextBackColor = color;
+}
+
+uint16_t LCD_GetTextLineColor(uint16_t color)
+{
+	return m_lcdTextLineColor;
+}
+
+uint16_t LCD_GetTextBackColor(uint16_t color)
+{
+	return m_lcdTextBackColor;
+}
+
+
 /////////////////////////////////////////////////
 //GetPalletValue
 //Returns the pallet entry for a 16 bit 565 RGB color
@@ -212,9 +238,10 @@ void LCD_Clear(uint8_t layer, uint16_t color)
 
 ///////////////////////////////////////////////
 //LCD_PutPixel
-//Draw pixel into page located on SDRAM.
-//Note:  This draws an extra byte since the SDRAM
-//is configured as 16bits, need to fix this.
+//Draw pixel into page located on SDRAM.  Since the color
+//depth is 8 bits and the sdram bus width is 16, we
+//need to do a read/mod/write in order to avoid writing
+//dead/unknown data.
 //
 void LCD_PutPixel(uint8_t layer, uint16_t x, uint16_t y, uint16_t color)
 {
@@ -225,16 +252,21 @@ void LCD_PutPixel(uint8_t layer, uint16_t x, uint16_t y, uint16_t color)
     if ((y < 0) || (y > LCD_HEIGHT - 1))
         return;
 
-    uint8_t color8 = LCD_GetRGB332PalletValue(color);
+    uint32_t color8 = LCD_GetRGB332PalletValue(color) & 0xFF;
+
     //each of these correspond to a number of elements
     //counted from the top element
     uint16_t rowOffset = y * LCD_WIDTH;
     uint16_t colOffset = x; 
     uint16_t cell = rowOffset + colOffset;
 
-    //draw to the appropriate layer in sdram
+    //read one up for or-ing to the current at the msb
+    volatile uint32_t oneUp = *(__IO uint32_t*) (SDRAM_BASE_ADDR + SDRAM_LCD_LAYER_OFFSET +
+						(layer * SDRAM_LCD_LAYER_SIZE) + cell + 1);
+
+    //add color into the lsb
 	*(__IO uint32_t*) (SDRAM_BASE_ADDR + SDRAM_LCD_LAYER_OFFSET +
-						(layer * SDRAM_LCD_LAYER_SIZE) + cell) = color8;
+						(layer * SDRAM_LCD_LAYER_SIZE) + cell) = color8 | (oneUp << 8);
 }
 
 //////////////////////////////////////////////
@@ -293,8 +325,9 @@ void LCD_DrawRadius(uint8_t layer, int x0, int y0, int length, int angle, uint16
 //LCD_RotateBuffer
 //Rotates the contents of source into destination
 //at angle, about center xc, yc.
+//Assumes the full LCD height/width is rotated.
 //
-void LCD_RotateBuffer(uint8_t* source, uint8_t* destination, uint16_t angle, int xc, int yc)
+void LCD_RotateBuffer(uint32_t sourceLayer, uint32_t destinationLayer, uint16_t angle, int xc, int yc)
 {
 	//temp values
 	//computed x and y based on i, j, and coordinate system.
@@ -341,10 +374,14 @@ void LCD_RotateBuffer(uint8_t* source, uint8_t* destination, uint16_t angle, int
             uint16_t newRowOffset = (uint16_t)newy * LCD_WIDTH;
             uint16_t newColOffset = (uint16_t)newx;
 
-            uint16_t value = source[newRowOffset + newColOffset];
+            //read the value at the source location at transformed x/y
+            uint8_t value = *(__IO uint32_t*) (SDRAM_BASE_ADDR + SDRAM_LCD_LAYER_OFFSET +
+                  						(sourceLayer * SDRAM_LCD_LAYER_SIZE) + (newRowOffset + newColOffset));
 
-            uint16_t cell = y*LCD_WIDTH + x;
-            destination[cell] = value;
+            //write to the target location
+            *(__IO uint32_t*) (SDRAM_BASE_ADDR + SDRAM_LCD_LAYER_OFFSET +
+                        (destinationLayer * SDRAM_LCD_LAYER_SIZE) + (y*LCD_WIDTH + x)) = value;
+
 		}
 	}
 }
@@ -395,16 +432,16 @@ void LCD_DrawChar(uint8_t layer, uint8_t row, uint8_t col, uint8_t letter)
 			//scan right to left
 			bit = (((uint16_t)1u << (16-p) ) & temp) >> (16-p);
 
-			//if the bit = 0 - it's blank
-			//if the bit = 1 - it's a color
+			//if the bit = 0 - it's blank - back color
+			//if the bit = 1 - it's a color - line color
 			if (bit == 1)
 			{
 				//draws flipped left to right
-				LCD_PutPixel(layer, xOffset + 16 - p, yOffset + i, WHITE);
+				LCD_PutPixel(layer, xOffset + 16 - p, yOffset + i, m_lcdTextLineColor);
 			}
 			else
 			{
-				LCD_PutPixel(layer, xOffset + 16 - p, yOffset + i, BLACK);
+				LCD_PutPixel(layer, xOffset + 16 - p, yOffset + i, m_lcdTextBackColor);
 			}
 
 			p--;

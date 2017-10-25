@@ -157,45 +157,43 @@ void StartDefaultTask(void const * argument)
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
 
-
 	/* Infinite loop */
 	for(;;)
 	{
-
 		//use only layer 0
 		HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
 		HAL_GPIO_TogglePin(GPIOG, LED_Green_Pin);
 
+		//draw something
 		LCD_Clear(0, RED);
+		LCD_SetTextBackColor(RED);
+		LCD_SetTextLineColor(BLUE);
 
-		switch(row)
+		LCD_DrawString(0,4, "---<ROTATE>---");
+		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
+		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
+		osDelay(1000);
+
+		//rotate 0 into 1 at diffferent angles
+		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_1, 0);
+		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_1, 1);
+
+		for (int i = 0 ; i < 90 ; i++)
 		{
-			case 0:
-				LCD_DrawString(0,0, "Hello Row 0");
-				break;
-			case 2:
-				LCD_DrawString(0,2, "Hello Row 2");
-				break;
-			case 4:
-				LCD_DrawString(0,4, "Hello Row 4");
-				break;
-			case 6:
-				LCD_DrawString(0,6, "Hello Row 6");
-				break;
-			case 8:
-				LCD_DrawString(0,8, "Hello Row 8");
-				break;
-			case 10:
-				LCD_DrawString(0,10, "Hello Row 10");
-				break;
+			LCD_RotateBuffer(0, 1, 4 * i, 120, 160);
+			osDelay(20);
 		}
 
-		if (row < 10)
-			row+=2;
-		else
-			row = 0;
-
 		osDelay(1000);
+
+		//put pixels
+		LCD_Clear(0, BLUE);
+		LCD_DrawLine(0, 0, 0, 240, 240, WHITE);
+		LCD_DrawLine(0, 240, 0, 0, 240, RED);
+		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
+		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
+		osDelay(3000);
+
 
 	}
 
