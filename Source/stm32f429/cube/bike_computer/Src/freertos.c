@@ -141,12 +141,12 @@ void MX_FREERTOS_Init(void) {
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument)
 {
-	uint8_t row = 0;
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
 
-	/* init code for USB_DEVICE */
-	MX_USB_DEVICE_Init();
+  /* USER CODE BEGIN StartDefaultTask */
 
-	/* USER CODE BEGIN StartDefaultTask */
+  	  uint8_t row = 0;
 
 	//draw some initial text in each layer
 	LCD_DrawString(0,0, "Hello Row 0");
@@ -199,7 +199,7 @@ void StartDefaultTask(void const * argument)
 
 	}
 
-	/* USER CODE END StartDefaultTask */
+  /* USER CODE END StartDefaultTask */
 }
 
 /* USER CODE BEGIN Application */
