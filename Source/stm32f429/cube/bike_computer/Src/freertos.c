@@ -146,16 +146,6 @@ void StartDefaultTask(void const * argument)
 
   /* USER CODE BEGIN StartDefaultTask */
 
-  	  uint8_t row = 0;
-
-	//draw some initial text in each layer
-	LCD_DrawString(0,0, "Hello Row 0");
-	LCD_DrawString(0,2, "Hello Row 2");
-	LCD_DrawString(0,4, "Hello Row 4");
-	LCD_DrawString(0,6, "Hello Row 6");
-
-	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
-	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
 
 	/* Infinite loop */
 	for(;;)

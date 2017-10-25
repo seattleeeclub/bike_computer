@@ -153,7 +153,6 @@ int main(void)
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_1, 1);
 
-
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

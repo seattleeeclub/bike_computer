@@ -179,12 +179,12 @@ void LCD_SetTextBackColor(uint16_t color)
 	m_lcdTextBackColor = color;
 }
 
-uint16_t LCD_GetTextLineColor(uint16_t color)
+uint16_t LCD_GetTextLineColor(void)
 {
 	return m_lcdTextLineColor;
 }
 
-uint16_t LCD_GetTextBackColor(uint16_t color)
+uint16_t LCD_GetTextBackColor(void)
 {
 	return m_lcdTextBackColor;
 }
@@ -326,6 +326,8 @@ void LCD_DrawRadius(uint8_t layer, int x0, int y0, int length, int angle, uint16
 //Rotates the contents of source into destination
 //at angle, about center xc, yc.
 //Assumes the full LCD height/width is rotated.
+//Source and destination are buffers defined in Memory.h
+//and located on SDRAM.
 //
 void LCD_RotateBuffer(uint32_t sourceLayer, uint32_t destinationLayer, uint16_t angle, int xc, int yc)
 {
@@ -369,7 +371,6 @@ void LCD_RotateBuffer(uint32_t sourceLayer, uint32_t destinationLayer, uint16_t 
                newy = 0.0;
            else if (newy > (LCD_HEIGHT - 1))
                newy = LCD_HEIGHT - 1;
-
 
             uint16_t newRowOffset = (uint16_t)newy * LCD_WIDTH;
             uint16_t newColOffset = (uint16_t)newx;

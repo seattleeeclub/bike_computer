@@ -53,7 +53,6 @@ Layer addresses defined in Memory.h
 #define MAGENTA                 (0xF81F)
 #define YELLOW                  (0xFFE0)
 #define WHITE                   (0xFFFF)
-
 #define ORANGE                  (0xF3E4)
 
 
@@ -77,8 +76,8 @@ extern uint32_t colorPalletRGB323[256];
 
 void LCD_SetTextLineColor(uint16_t color);
 void LCD_SetTextBackColor(uint16_t color);
-uint16_t LCD_GetTextLineColor(uint16_t color);
-uint16_t LCD_GetTextBackColor(uint16_t color);
+uint16_t LCD_GetTextLineColor(void);
+uint16_t LCD_GetTextBackColor(void);
 
 uint8_t LCD_GetRGB332PalletValue(uint16_t color);
 void LCD_Clear(uint8_t layer, uint16_t color);
@@ -87,12 +86,10 @@ void LCD_DrawLine(uint8_t layer, int x0, int y0, int x1, int y1, uint16_t color)
 void LCD_DrawRadius(uint8_t layer, int x0, int y0, int length, int angle, uint16_t color);
 void LCD_RotateBuffer(uint32_t sourceLayer, uint32_t destinationLayer, uint16_t angle, int xc, int yc);
 
-
 //text functions - 16x24 characters
 void LCD_DrawChar(uint8_t layer, uint8_t row, uint8_t col, uint8_t letter);
 void LCD_DrawString(uint8_t layer, uint8_t row, char* output);
 void LCD_DrawStringLength(uint8_t layer, uint8_t row, char output[], uint8_t length);
-
 
 
 #endif
