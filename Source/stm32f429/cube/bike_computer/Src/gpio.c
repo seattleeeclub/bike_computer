@@ -164,7 +164,10 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = Touch_Panel_EXTI15_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+//  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Touch_Panel_EXTI15_GPIO_Port, &GPIO_InitStruct);
 

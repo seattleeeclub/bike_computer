@@ -57,6 +57,8 @@
 #include "Memory.h"		//SDRAM layer definitions
 #include "ltdc.h"		//layer control
 
+#include "TouchPanel.h"
+
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -86,6 +88,10 @@ __weak void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTask
    /* Run time stack overflow checking is performed if
    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
    called if a stack overflow is detected. */
+	while(1)
+	{
+
+	}
 }
 /* USER CODE END 4 */
 
@@ -102,6 +108,11 @@ __weak void vApplicationMallocFailedHook(void)
    FreeRTOSConfig.h, and the xPortGetFreeHeapSize() API function can be used
    to query the size of free heap space that remains (although it does not
    provide information on how the remaining heap might be fragmented). */
+
+	while(1)
+	{
+
+	}
 }
 /* USER CODE END 5 */
 
@@ -146,20 +157,27 @@ void StartDefaultTask(void const * argument)
 
   /* USER CODE BEGIN StartDefaultTask */
 
+  int ret = 0x00;
 
 	/* Infinite loop */
 	for(;;)
 	{
 		//use only layer 0
-		HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
-		HAL_GPIO_TogglePin(GPIOG, LED_Green_Pin);
+		//HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
+		//HAL_GPIO_TogglePin(GPIOG, LED_Green_Pin);
+
+		ret = TouchPanel_init();
 
 		//draw something
 		LCD_Clear(0, RED);
 		LCD_SetTextBackColor(RED);
 		LCD_SetTextLineColor(BLUE);
 
-		LCD_DrawString(0,4, "---<ROTATE>---");
+		if (ret >=0)
+			LCD_DrawString(0,4, "---<SUCCESS>---");
+		else
+			LCD_DrawString(0,4, "---<FAILURE>---");
+
 		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
 		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
 		osDelay(1000);
