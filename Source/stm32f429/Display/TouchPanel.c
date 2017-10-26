@@ -27,6 +27,14 @@ API function calls:
 HAL_StatusTypeDef HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout);
 HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout);
 
+
+location data:
+x and y are 12 bits, no need for z data
+default x is increasing to the left (need to reverse)
+default y is increasing down (ok)
+
+normalize x and y read values to LCD_WIDTH and LCD_HEIGHT
+
 */
 //////////////////////////////////////////////////////////
 
@@ -34,44 +42,64 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
 #include "i2c.h"
 #include "gpio.h"
 
+#include "Graphics.h"
+
+///////////////////////////////////////////////
+//variables
+TouchPanelData m_touchPanelData;
 
 
 ////////////////////////////////////////
 //reads the chip id and id version.
 //returns... 0 if ok, -1 if not
 //
-int TouchPanel_init(void)
+void TouchPanel_init(void)
 {
-	int ret = 0x00;
+	m_touchPanelData.xPos = 0x00;
+	m_touchPanelData.yPos = 0x00;
 
-	uint16_t chipID = TouchPanel_readChipID();
-	uint8_t IDVersion = TouchPanel_readIDVersion();
+	//uint16_t chipID = TouchPanel_readChipID();
+	//uint8_t IDVersion = TouchPanel_readIDVersion();
 
-	if (chipID == TOUCH_PANEL_CHIP_ID)
-	{
-		HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_RESET);
-	}
-	else
-	{
-		HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_SET);
-		ret = -1;
-	}
-	if (IDVersion == TOUCH_PANEL_ID_VER)
-	{
-		HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_RESET);
+	TouchPanel_writeReg1Byte(TP_REG_SYS_CTRL1, 0x02);		//reset, bit 1, no hibernate
 
-	}
-	else
-	{
-		HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_SET);
-		ret = -1;
-	}
+	//disable the clock gating
+	TouchPanel_writeReg1Byte(TP_REG_SYS_CTRL2, 0x0F);		//switch off ts, gpio, tsc, adc
 
-	return ret;
+	//configure the controller - read only x and y data
+	//no window tracking
+	//write 00000010 - x and y only, no tracking, EN bit low = 0x02
+	//write 00000011 - x and y only, no tracking, EN bit high = 0x03
+
+
+	TouchPanel_writeReg1Byte(TP_REG_TSC_CTRL, 0x00);		//no window tracking, xy data, EN bit low
+	TouchPanel_writeReg1Byte(TP_REG_TSC_CTRL, 0x02);		//no window tracking, xy data, EN bit low
+
+	//tsc_config
+	//1 sample 00, det delay 50us 001, settling 100us 001, 00001001
+	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x09);
+
+	//configure the fifo - fifo 2, two elements in the fifo to trigger
+	TouchPanel_writeReg1Byte(TP_REG_TSC_FIFO_TH, 0x02);
+
+	//configure the interrupts
+	//int control - falling edge, edge interrupt, global 0x03
+	TouchPanel_writeReg1Byte(TP_REG_INT_CTRL, 0x03);
+
+	//enable touch detect interrupt
+	TouchPanel_writeReg1Byte(TP_REG_INT_EN, 0x01);
+
+	//reset the fifo
+	TouchPanel_writeReg1Byte(TP_REG_TSC_FIFO_STA, 0x21);
+	TouchPanel_writeReg1Byte(TP_REG_TSC_FIFO_STA, 0x20);
+
+	//enable the clocks - all clocks on
+	TouchPanel_writeReg1Byte(TP_REG_SYS_CTRL2, 0x00);
+
+	//set the EN bit to enable the panel and start detecting
+	TouchPanel_writeReg1Byte(TP_REG_TSC_CTRL, 0x03);
+
+
 
 }
 
@@ -98,6 +126,37 @@ uint16_t TouchPanel_readReg2Bytes(uint16_t reg)
 
 	return result;
 }
+
+uint32_t TouchPanel_readReg4Bytes(uint16_t reg)
+{
+	uint8_t value[4] = {0x00, 0x00, 0x00, 0x00};
+	HAL_I2C_Mem_Read(&hi2c3, TOUCH_PANEL_ADDRESS, reg, 1, value, 4, 0xFF);
+
+	//reads into most to least
+	uint32_t result = ((uint32_t)value[0]) << 24;
+	result |= ((uint32_t)value[1]) << 16;
+	result |= ((uint32_t)value[2]) << 8;
+	result |= ((uint32_t)value[3]);
+
+	return result;
+}
+
+
+///////////////////////////////////////////
+//top 8 bits are don't care
+uint32_t TouchPanel_readReg3Bytes(uint16_t reg)
+{
+	uint8_t value[3] = {0x00, 0x00, 0x00};
+	HAL_I2C_Mem_Read(&hi2c3, TOUCH_PANEL_ADDRESS, reg, 1, value, 3, 0xFF);
+
+	//reads into most to least
+	uint32_t result = ((uint32_t)value[0]) << 16;
+	result |= ((uint32_t)value[1]) << 8;
+	result |= ((uint32_t)value[2]);
+
+	return result;
+}
+
 
 void TouchPanel_writeReg1Byte(uint16_t reg, uint8_t value)
 {
@@ -132,4 +191,157 @@ uint8_t TouchPanel_readIDVersion()
 	uint8_t ret = TouchPanel_readReg1Byte(TOUCH_PANEL_ID_VER_REG);
 	return ret;
 }
+
+
+uint8_t TouchPanel_GetFIFOStatus(void)
+{
+	uint8_t status = TouchPanel_readReg1Byte(TP_REG_TSC_FIFO_STA);
+	return status;
+}
+uint8_t TouchPanel_GetFIFOSize(void)
+{
+	uint8_t level = TouchPanel_readReg1Byte(TP_REG_TSC_FIFO_SIZE);
+	return level;
+}
+
+////////////////////////////////////////
+//FIFO_STA - bit 5 high if empty
+//returns 1 if empty
+uint8_t TouchPanel_FIFO_isEmpty(void)
+{
+	uint8_t status = TouchPanel_readReg1Byte(TP_REG_TSC_FIFO_STA);
+	return ((status >> 5) & 0x01);
+}
+
+
+/////////////////////////////////
+//clears the contents in the fifo
+
+void TouchPanel_FIFO_clear(void)
+{
+	TouchPanel_writeReg1Byte(TP_REG_TSC_FIFO_STA, 0x01);
+}
+///////////////////////////////////////////////
+//Read xyz data and fifo level
+//if nothing in the fifo, returns all zeros
+//uses the compact xyz register for reading data
+//try reading the clunky way first...
+//
+//should probably change this to int return,
+//where 0 is ok, -1 is no data...
+
+//reads the raw data, normalizes with respect
+//to panel width and height
+//
+TouchPanelData TouchPanel_readRawData(void)
+{
+	TouchPanelData data;
+	uint8_t size = 0x00;
+	uint32_t temp, tempX, tempY;
+
+	data.xPos = 0x00;
+	data.yPos = 0x00;
+
+	//data sets remaining in the fifo
+	size = TouchPanel_readReg1Byte(TP_REG_TSC_FIFO_SIZE);
+
+	//read position data if there's something to read
+	if (size > 0)
+	{
+		//read 3 bytes - x and y data only
+		//top 8 bits are don't care
+		temp = TouchPanel_readReg3Bytes(TP_REG_TSC_DATA_XYZ);
+
+		tempX = ((temp >> 12) & 0xFFF);
+		tempY = temp & 0xFFF;
+
+
+		//read x and y only - 12 bits
+//		tempX = (TouchPanel_readReg2Bytes(TP_REG_TSC_DATA_X) & 0xFFF);
+//		tempY = (TouchPanel_readReg2Bytes(TP_REG_TSC_DATA_Y) & 0xFFF);
+
+		//invert x to make icnreasing to the right
+//		tempX = 4095 - tempX;
+
+		//normalize
+//		tempX = tempX * TOUCH_PANEL_WIDTH / 0xFFF;
+//		tempY = tempY * TOUCH_PANEL_HEIGHT / 0xFFF;
+
+		data.xPos = (uint16_t)tempX;
+		data.yPos = (uint16_t)tempY;
+
+	}
+
+	return data;
+}
+
+
+TouchPanelData TouchPanel_getPosition(void)
+{
+	return m_touchPanelData;
+}
+
+void TouchPanel_setPosition(TouchPanelData data)
+{
+	m_touchPanelData.xPos = data.xPos;
+	m_touchPanelData.yPos = data.yPos;
+}
+
+///////////////////////////////////////
+//touch detected
+//TSC_CTRL reg - bit 7 high if detected
+//
+uint8_t TouchPanel_touchDetected(void)
+{
+	uint8_t result = TouchPanel_readReg1Byte(TP_REG_TSC_CTRL);
+	return ((result >> 7) & 0x01);
+
+}
+
+
+/////////////////////////////////////////
+//reads the interrupt status register for
+//which interrupts have been triggered
+//return only the touch detected, or bit 0
+uint8_t TouchPanel_interruptStatus(void)
+{
+	uint8_t status = TouchPanel_readReg1Byte(TP_REG_INT_STA);
+	return (status & 0x01);
+}
+
+//////////////////////////////////////////
+//clears touch detected interrupt
+void TouchPanel_interruptClear(void)
+{
+	TouchPanel_writeReg1Byte(TP_REG_INT_STA, 0x01);
+}
+
+
+///////////////////////////////////////////////////
+//Interrupt Callback from the TouchPanel
+//Triggers when the panel is touched.
+//There must be a flag you have to clear
+//in the panel registers because it only triggers
+//first time then no further detection
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	volatile TouchPanelData data;
+	volatile uint8_t size;
+
+	if (GPIO_Pin == Touch_Panel_EXTI15_Pin)
+	{
+		size = TouchPanel_GetFIFOSize();
+
+		//read data size times
+		for (int i = 0 ; i < size ; i++)
+		{
+			data = TouchPanel_readRawData();
+			TouchPanel_setPosition(data);		//update position
+
+		}
+	}
+
+	TouchPanel_interruptClear();		//clear the interrupt
+}
+
 

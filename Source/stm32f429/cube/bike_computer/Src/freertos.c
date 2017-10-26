@@ -156,8 +156,17 @@ void StartDefaultTask(void const * argument)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN StartDefaultTask */
+  uint8_t buffer[16];
+  int n;
 
-  int ret = 0x00;
+  TouchPanelData tpData = TouchPanel_getPosition();
+
+	LCD_SetTextBackColor(RED);
+	LCD_SetTextLineColor(BLUE);
+
+	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
+	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
+
 
 	/* Infinite loop */
 	for(;;)
@@ -166,17 +175,47 @@ void StartDefaultTask(void const * argument)
 		//HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
 		//HAL_GPIO_TogglePin(GPIOG, LED_Green_Pin);
 
-		ret = TouchPanel_init();
-
-		//draw something
 		LCD_Clear(0, RED);
-		LCD_SetTextBackColor(RED);
-		LCD_SetTextLineColor(BLUE);
+		tpData = TouchPanel_getPosition();
 
-		if (ret >=0)
+		//write the position
+		n = sprintf((char*)buffer, "Xpos: %d", tpData.xPos);
+		LCD_DrawStringLength(0,1, buffer, (uint8_t)n);
+		n = sprintf((char*)buffer, "Ypos: %d", tpData.yPos);
+		LCD_DrawStringLength(0,2, buffer, (uint8_t)n);
+
+		osDelay(100);
+
+/*
+
+		uint16_t chipID = TouchPanel_readChipID();
+		uint8_t IDVersion = TouchPanel_readIDVersion();
+		tpData = TouchPanel_getPosition();
+
+		if ((chipID == TOUCH_PANEL_CHIP_ID) && (IDVersion == TOUCH_PANEL_ID_VER))
+		{
+			//hold red low and toggle green
+			HAL_GPIO_TogglePin(LED_Green_GPIO_Port, LED_Green_Pin);
+			HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_RESET);
 			LCD_DrawString(0,4, "---<SUCCESS>---");
+
+			//write the position
+			n = sprintf((char*)buffer, "Xpos: %d", tpData.xPos);
+			LCD_DrawStringLength(0,1, buffer, (uint8_t)n);
+			n = sprintf((char*)buffer, "Ypos: %d", tpData.yPos);
+			LCD_DrawStringLength(0,2, buffer, (uint8_t)n);
+			n = sprintf((char*)buffer, "Zpos: %d", tpData.zPos);
+			LCD_DrawStringLength(0,3, buffer, (uint8_t)n);
+
+
+		}
 		else
+		{
+			HAL_GPIO_TogglePin(LED_Red_GPIO_Port, LED_Red_Pin);
+			HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_RESET);
 			LCD_DrawString(0,4, "---<FAILURE>---");
+		}
+
 
 		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
 		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
@@ -201,6 +240,8 @@ void StartDefaultTask(void const * argument)
 		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
 		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
 		osDelay(3000);
+
+*/
 
 
 	}

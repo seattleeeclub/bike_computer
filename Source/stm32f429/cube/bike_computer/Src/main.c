@@ -71,7 +71,7 @@
 #include "ili9341.h"
 #include "Graphics.h"
 #include "Memory.h"
-
+#include "TouchPanel.h"
 
 /* USER CODE END Includes */
 
@@ -153,7 +153,8 @@ int main(void)
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_1, 1);
 
-	//read something from i2c
+	//init the touch panel
+	TouchPanel_init();
 
 
   /* USER CODE END 2 */
