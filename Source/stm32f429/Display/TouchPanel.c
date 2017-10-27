@@ -48,7 +48,6 @@ normalize x and y read values to LCD_WIDTH and LCD_HEIGHT
 //variables
 TouchPanelData m_touchPanelData;
 
-
 ////////////////////////////////////////
 //reads the chip id and id version.
 //returns... 0 if ok, -1 if not
@@ -57,6 +56,8 @@ void TouchPanel_init(void)
 {
 	m_touchPanelData.xPos = 0x00;
 	m_touchPanelData.yPos = 0x00;
+	m_touchPanelData.xRawPos = 0x00;
+	m_touchPanelData.yRawPos = 0x00;
 
 	//uint16_t chipID = TouchPanel_readChipID();
 	//uint8_t IDVersion = TouchPanel_readIDVersion();
@@ -71,13 +72,15 @@ void TouchPanel_init(void)
 	//write 00000010 - x and y only, no tracking, EN bit low = 0x02
 	//write 00000011 - x and y only, no tracking, EN bit high = 0x03
 
-
 	TouchPanel_writeReg1Byte(TP_REG_TSC_CTRL, 0x00);		//no window tracking, xy data, EN bit low
 	TouchPanel_writeReg1Byte(TP_REG_TSC_CTRL, 0x02);		//no window tracking, xy data, EN bit low
 
 	//tsc_config
 	//1 sample 00, det delay 50us 001, settling 100us 001, 00001001
-	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x09);
+//	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x09);
+
+	//2 samples 01, det delay 50us 001, settling 100us 001, 01001001
+	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x49);
 
 	//configure the fifo - fifo 2, two elements in the fifo to trigger
 	TouchPanel_writeReg1Byte(TP_REG_TSC_FIFO_TH, 0x02);
@@ -255,17 +258,27 @@ TouchPanelData TouchPanel_readRawData(void)
 		tempX = ((temp >> 12) & 0xFFF);
 		tempY = temp & 0xFFF;
 
-
-		//read x and y only - 12 bits
-//		tempX = (TouchPanel_readReg2Bytes(TP_REG_TSC_DATA_X) & 0xFFF);
-//		tempY = (TouchPanel_readReg2Bytes(TP_REG_TSC_DATA_Y) & 0xFFF);
-
 		//invert x to make icnreasing to the right
-//		tempX = 4095 - tempX;
+		tempX = 4095 - tempX;
 
-		//normalize
-//		tempX = tempX * TOUCH_PANEL_WIDTH / 0xFFF;
-//		tempY = tempY * TOUCH_PANEL_HEIGHT / 0xFFF;
+		data.xRawPos = tempX;
+		data.yRawPos = tempY;
+
+		//normalize to the width/heigth, accounting for the min and max
+		if (tempX < TOUCH_PANEL_CALIB_X_MIN)
+			tempX = 0;
+		else if (tempX > TOUCH_PANEL_CALIB_X_MAX)
+			tempX = TOUCH_PANEL_WIDTH;
+		else
+			tempX = (tempX - TOUCH_PANEL_CALIB_X_MIN) * TOUCH_PANEL_WIDTH / (TOUCH_PANEL_CALIB_X_MAX - TOUCH_PANEL_CALIB_X_MIN);
+
+
+		if (tempY < TOUCH_PANEL_CALIB_Y_MIN)
+			tempY = 0;
+		else if (tempY > TOUCH_PANEL_CALIB_Y_MAX)
+			tempY = TOUCH_PANEL_HEIGHT;
+		else
+			tempY = (tempY - TOUCH_PANEL_CALIB_Y_MIN) * TOUCH_PANEL_HEIGHT / (TOUCH_PANEL_CALIB_Y_MAX - TOUCH_PANEL_CALIB_Y_MIN);
 
 		data.xPos = (uint16_t)tempX;
 		data.yPos = (uint16_t)tempY;
@@ -285,6 +298,8 @@ void TouchPanel_setPosition(TouchPanelData data)
 {
 	m_touchPanelData.xPos = data.xPos;
 	m_touchPanelData.yPos = data.yPos;
+	m_touchPanelData.xRawPos = data.xRawPos;
+	m_touchPanelData.yRawPos = data.yRawPos;
 }
 
 ///////////////////////////////////////

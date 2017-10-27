@@ -23,11 +23,16 @@ read the x and y position from the touch panel
 #ifndef __TOUCH_PANEL_H
 #define __TOUCH_PANEL_H
 
-
 #include "i2c.h"
 
 #define TOUCH_PANEL_WIDTH		240
 #define TOUCH_PANEL_HEIGHT		320
+
+//normalize to a range
+#define TOUCH_PANEL_CALIB_X_MIN		((uint32_t)500)
+#define TOUCH_PANEL_CALIB_X_MAX		((uint32_t)3600)
+#define TOUCH_PANEL_CALIB_Y_MIN		((uint32_t)500)
+#define TOUCH_PANEL_CALIB_Y_MAX		((uint32_t)3600)
 
 //address
 #define TOUCH_PANEL_ADDRESS		0x82
@@ -65,6 +70,8 @@ typedef struct
 {
 	uint16_t xPos;
 	uint16_t yPos;
+	uint16_t xRawPos;
+	uint16_t yRawPos;
 
 }TouchPanelData;
 

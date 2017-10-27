@@ -163,7 +163,7 @@ void StartDefaultTask(void const * argument)
 
 	LCD_SetTextBackColor(RED);
 	LCD_SetTextLineColor(BLUE);
-
+	LCD_Clear(0, RED);
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
 
@@ -175,16 +175,20 @@ void StartDefaultTask(void const * argument)
 		//HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
 		//HAL_GPIO_TogglePin(GPIOG, LED_Green_Pin);
 
-		LCD_Clear(0, RED);
 		tpData = TouchPanel_getPosition();
 
 		//write the position
-		n = sprintf((char*)buffer, "Xpos: %d", tpData.xPos);
+		n = sprintf((char*)buffer, "Xpos: %d   ", tpData.xPos);
 		LCD_DrawStringLength(0,1, buffer, (uint8_t)n);
-		n = sprintf((char*)buffer, "Ypos: %d", tpData.yPos);
+		n = sprintf((char*)buffer, "Ypos: %d   ", tpData.yPos);
 		LCD_DrawStringLength(0,2, buffer, (uint8_t)n);
 
-		osDelay(100);
+		n = sprintf((char*)buffer, "Xraw: %d   ", tpData.xRawPos);
+		LCD_DrawStringLength(0,3, buffer, (uint8_t)n);
+		n = sprintf((char*)buffer, "Yraw: %d   ", tpData.yRawPos);
+		LCD_DrawStringLength(0,4, buffer, (uint8_t)n);
+
+		osDelay(200);
 
 /*
 
