@@ -65,7 +65,6 @@ read the x and y position from the touch panel
 #define TP_REG_TSC_DATA_Z			0x51		//z data - 1 byte
 #define TP_REG_TSC_DATA_XYZ			0x52		//xyz data - 4 bytes
 
-
 typedef struct
 {
 	uint16_t xPos;
@@ -97,9 +96,7 @@ TouchPanelData  TouchPanel_readRawData(void);
 TouchPanelData TouchPanel_getPosition(void);
 void TouchPanel_setPosition(TouchPanelData data);
 
-
 uint8_t TouchPanel_touchDetected(void);
-
 uint8_t TouchPanel_interruptStatus(void);
 void TouchPanel_interruptClear(void);
 

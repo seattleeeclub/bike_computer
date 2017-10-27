@@ -9,7 +9,6 @@ board.
 Touch screen uses the the STM811 controller ic
 and is wired up to the I2C3 peripheral.
 
-
 hi2c3
 
  I2C3 GPIO Configuration
@@ -101,9 +100,6 @@ void TouchPanel_init(void)
 
 	//set the EN bit to enable the panel and start detecting
 	TouchPanel_writeReg1Byte(TP_REG_TSC_CTRL, 0x03);
-
-
-
 }
 
 uint8_t TouchPanel_readReg1Byte(uint16_t reg)
@@ -179,8 +175,6 @@ void TouchPanel_writeReg2Bytes(uint16_t reg, uint16_t value)
 }
 
 
-
-
 ///////////////////////////////////////
 //read 2 byte value - chip id register
 uint16_t TouchPanel_readChipID()
@@ -188,14 +182,11 @@ uint16_t TouchPanel_readChipID()
 	uint16_t ret = TouchPanel_readReg2Bytes(TOUCH_PANEL_CHIP_ID_REG);
 	return ret;
 }
-
 uint8_t TouchPanel_readIDVersion()
 {
 	uint8_t ret = TouchPanel_readReg1Byte(TOUCH_PANEL_ID_VER_REG);
 	return ret;
 }
-
-
 uint8_t TouchPanel_GetFIFOStatus(void)
 {
 	uint8_t status = TouchPanel_readReg1Byte(TP_REG_TSC_FIFO_STA);
@@ -272,7 +263,6 @@ TouchPanelData TouchPanel_readRawData(void)
 		else
 			tempX = (tempX - TOUCH_PANEL_CALIB_X_MIN) * TOUCH_PANEL_WIDTH / (TOUCH_PANEL_CALIB_X_MAX - TOUCH_PANEL_CALIB_X_MIN);
 
-
 		if (tempY < TOUCH_PANEL_CALIB_Y_MIN)
 			tempY = 0;
 		else if (tempY > TOUCH_PANEL_CALIB_Y_MAX)
@@ -282,7 +272,6 @@ TouchPanelData TouchPanel_readRawData(void)
 
 		data.xPos = (uint16_t)tempX;
 		data.yPos = (uint16_t)tempY;
-
 	}
 
 	return data;
@@ -310,7 +299,6 @@ uint8_t TouchPanel_touchDetected(void)
 {
 	uint8_t result = TouchPanel_readReg1Byte(TP_REG_TSC_CTRL);
 	return ((result >> 7) & 0x01);
-
 }
 
 
@@ -352,7 +340,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			data = TouchPanel_readRawData();
 			TouchPanel_setPosition(data);		//update position
-
 		}
 	}
 

@@ -91,5 +91,4 @@ void LCD_DrawChar(uint8_t layer, uint8_t row, uint8_t col, uint8_t letter);
 void LCD_DrawString(uint8_t layer, uint8_t row, char* output);
 void LCD_DrawStringLength(uint8_t layer, uint8_t row, char output[], uint8_t length);
 
-
 #endif

@@ -156,7 +156,6 @@ int main(void)
 	//init the touch panel
 	TouchPanel_init();
 
-
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

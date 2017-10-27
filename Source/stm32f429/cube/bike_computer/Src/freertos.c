@@ -156,10 +156,10 @@ void StartDefaultTask(void const * argument)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN StartDefaultTask */
-  uint8_t buffer[16];
-  int n;
+	uint8_t buffer[16];
+	int n;
 
-  TouchPanelData tpData = TouchPanel_getPosition();
+	TouchPanelData tpData = TouchPanel_getPosition();
 
 	LCD_SetTextBackColor(RED);
 	LCD_SetTextLineColor(BLUE);
@@ -182,7 +182,6 @@ void StartDefaultTask(void const * argument)
 		LCD_DrawStringLength(0,1, buffer, (uint8_t)n);
 		n = sprintf((char*)buffer, "Ypos: %d   ", tpData.yPos);
 		LCD_DrawStringLength(0,2, buffer, (uint8_t)n);
-
 		n = sprintf((char*)buffer, "Xraw: %d   ", tpData.xRawPos);
 		LCD_DrawStringLength(0,3, buffer, (uint8_t)n);
 		n = sprintf((char*)buffer, "Yraw: %d   ", tpData.yRawPos);
