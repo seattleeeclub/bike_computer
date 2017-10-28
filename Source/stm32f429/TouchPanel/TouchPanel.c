@@ -42,10 +42,18 @@ normalize x and y read values to LCD_WIDTH and LCD_HEIGHT
 #include "gpio.h"
 
 #include "Graphics.h"
+#include "ButtonWidget.h"
+
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
 ///////////////////////////////////////////////
 //variables
 TouchPanelData m_touchPanelData;
+
+extern QueueHandle_t PanelQueue;
 
 ////////////////////////////////////////
 //reads the chip id and id version.
@@ -330,6 +338,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	volatile TouchPanelData data;
 	volatile uint8_t size;
+	ButtonWidget_t button;
+
+	static portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
 	if (GPIO_Pin == Touch_Panel_EXTI15_Pin)
 	{
@@ -341,6 +352,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			data = TouchPanel_readRawData();
 			TouchPanel_setPosition(data);		//update position
 		}
+
+		//get the button from data and add to the queue
+		button = ButtonWidget_GetButtonFromPosition(data.xPos, data.yPos);
+		//(*button.buttonHandler)();
+        //post the message
+        xQueueSendFromISR(PanelQueue, &button, &xHigherPriorityTaskWoken);
+
+
 	}
 
 	TouchPanel_interruptClear();		//clear the interrupt

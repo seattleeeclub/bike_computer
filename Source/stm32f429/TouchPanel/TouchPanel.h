@@ -25,6 +25,7 @@ read the x and y position from the touch panel
 
 #include "i2c.h"
 
+
 #define TOUCH_PANEL_WIDTH		240
 #define TOUCH_PANEL_HEIGHT		320
 
@@ -73,6 +74,7 @@ typedef struct
 	uint16_t yRawPos;
 
 }TouchPanelData;
+
 
 
 void TouchPanel_init(void);

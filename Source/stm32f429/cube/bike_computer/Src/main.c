@@ -72,6 +72,7 @@
 #include "Graphics.h"
 #include "Memory.h"
 #include "TouchPanel.h"
+#include "ButtonWidget.h"
 
 /* USER CODE END Includes */
 
@@ -92,7 +93,7 @@ void MX_FREERTOS_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+//extern QueueHandle_t PanelQueue;
 /* USER CODE END 0 */
 
 int main(void)

@@ -52,12 +52,16 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
+#include "queue.h"
+
 #include "gpio.h"		//toggle LED_Green, LED_Red
 
 #include "Memory.h"		//SDRAM layer definitions
 #include "ltdc.h"		//layer control
 
 #include "TouchPanel.h"
+#include "ButtonWidget.h"
+
 
 /* USER CODE END Includes */
 
@@ -65,6 +69,10 @@
 osThreadId defaultTaskHandle;
 
 /* USER CODE BEGIN Variables */
+
+osThreadId panelTaskHandle;
+
+QueueHandle_t PanelQueue;
 
 /* USER CODE END Variables */
 
@@ -75,6 +83,8 @@ extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* USER CODE BEGIN FunctionPrototypes */
+
+void StartPanelTask(void const * argument);
 
 /* USER CODE END FunctionPrototypes */
 
@@ -142,6 +152,14 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+
+  osThreadDef(panelTask, StartPanelTask, osPriorityNormal, 0, 128);
+  panelTaskHandle = osThreadCreate(osThread(panelTask), NULL);
+
+
+  //queue of ButtonWidgets
+  PanelQueue = xQueueCreate(6, sizeof(ButtonWidget_t));
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -171,9 +189,7 @@ void StartDefaultTask(void const * argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		//use only layer 0
-		//HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
-		//HAL_GPIO_TogglePin(GPIOG, LED_Green_Pin);
+		HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
 
 		tpData = TouchPanel_getPosition();
 
@@ -189,63 +205,6 @@ void StartDefaultTask(void const * argument)
 
 		osDelay(200);
 
-/*
-
-		uint16_t chipID = TouchPanel_readChipID();
-		uint8_t IDVersion = TouchPanel_readIDVersion();
-		tpData = TouchPanel_getPosition();
-
-		if ((chipID == TOUCH_PANEL_CHIP_ID) && (IDVersion == TOUCH_PANEL_ID_VER))
-		{
-			//hold red low and toggle green
-			HAL_GPIO_TogglePin(LED_Green_GPIO_Port, LED_Green_Pin);
-			HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_RESET);
-			LCD_DrawString(0,4, "---<SUCCESS>---");
-
-			//write the position
-			n = sprintf((char*)buffer, "Xpos: %d", tpData.xPos);
-			LCD_DrawStringLength(0,1, buffer, (uint8_t)n);
-			n = sprintf((char*)buffer, "Ypos: %d", tpData.yPos);
-			LCD_DrawStringLength(0,2, buffer, (uint8_t)n);
-			n = sprintf((char*)buffer, "Zpos: %d", tpData.zPos);
-			LCD_DrawStringLength(0,3, buffer, (uint8_t)n);
-
-
-		}
-		else
-		{
-			HAL_GPIO_TogglePin(LED_Red_GPIO_Port, LED_Red_Pin);
-			HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_RESET);
-			LCD_DrawString(0,4, "---<FAILURE>---");
-		}
-
-
-		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
-		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
-		osDelay(1000);
-
-		//rotate 0 into 1 at diffferent angles
-		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_1, 0);
-		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_1, 1);
-
-		for (int i = 0 ; i < 90 ; i++)
-		{
-			LCD_RotateBuffer(0, 1, 4 * i, 120, 160);
-			osDelay(20);
-		}
-
-		osDelay(1000);
-
-		//put pixels
-		LCD_Clear(0, BLUE);
-		LCD_DrawLine(0, 0, 0, 240, 240, WHITE);
-		LCD_DrawLine(0, 240, 0, 0, 240, RED);
-		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
-		HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
-		osDelay(3000);
-
-*/
-
 
 	}
 
@@ -253,7 +212,41 @@ void StartDefaultTask(void const * argument)
 }
 
 /* USER CODE BEGIN Application */
-     
+
+
+
+////////////////////////////////////////////
+//touch panel task
+//receives a message from a queue to
+//evaluate which button was pressed
+//
+void StartPanelTask(void const * argument)
+{
+	ButtonWidget_t button;
+
+	for(;;)
+	{
+		if (pdPASS == xQueueReceive(PanelQueue, &button, portMAX_DELAY))
+		{
+			//do something
+			HAL_GPIO_TogglePin(LED_Green_GPIO_Port, LED_Green_Pin);
+			osDelay(100);
+			HAL_GPIO_TogglePin(LED_Green_GPIO_Port, LED_Green_Pin);
+
+		}
+	}
+
+	vTaskDelete(NULL);
+}
+
+
+
+
+
+
+
+
+
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
