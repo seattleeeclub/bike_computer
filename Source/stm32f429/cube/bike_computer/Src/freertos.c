@@ -170,28 +170,26 @@ void MX_FREERTOS_Init(void) {
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument)
 {
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
+	/* init code for USB_DEVICE */
+	MX_USB_DEVICE_Init();
 
-  /* USER CODE BEGIN StartDefaultTask */
+	/* USER CODE BEGIN StartDefaultTask */
 	uint8_t buffer[16];
 	int n;
-
-	TouchPanelData tpData = TouchPanel_getPosition();
+	TouchPanelData tpData;			//for reading panel location
 
 	LCD_SetTextBackColor(RED);
 	LCD_SetTextLineColor(BLUE);
 	LCD_Clear(0, RED);
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 0);
-	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_0, 1);
-
+	HAL_LTDC_SetAddress(&hltdc, (uint32_t)SDRAM_LCD_LAYER_1, 1);
 
 	/* Infinite loop */
 	for(;;)
 	{
 		HAL_GPIO_TogglePin(GPIOG, LED_Red_Pin);
 
-		tpData = TouchPanel_getPosition();
+		tpData = TouchPanel_getPosition();			//read the current touch position
 
 		//write the position
 		n = sprintf((char*)buffer, "Xpos: %d   ", tpData.xPos);
@@ -203,8 +201,13 @@ void StartDefaultTask(void const * argument)
 		n = sprintf((char*)buffer, "Yraw: %d   ", tpData.yRawPos);
 		LCD_DrawStringLength(0,4, buffer, (uint8_t)n);
 
-		osDelay(200);
+	//	ButtonWidget_DrawButtons(10);
 
+		LCD_DrawBox(0, 0, 120, 80, 80, GREEN);
+		LCD_DrawBox(0, 0, 200, 80, 80, BLUE);
+
+
+		osDelay(500);
 
 	}
 
@@ -223,16 +226,32 @@ void StartDefaultTask(void const * argument)
 void StartPanelTask(void const * argument)
 {
 	ButtonWidget_t button;
+	ButtonState_t state;
 
 	for(;;)
 	{
 		if (pdPASS == xQueueReceive(PanelQueue, &button, portMAX_DELAY))
 		{
-			//do something
-			HAL_GPIO_TogglePin(LED_Green_GPIO_Port, LED_Green_Pin);
-			osDelay(100);
-			HAL_GPIO_TogglePin(LED_Green_GPIO_Port, LED_Green_Pin);
+			//read the current state
+			state = button.btnState;
 
+			//toggle the state
+			if (state == BUTTON_STATE_OFF)
+				ButtonWidget_SetButtonState(button, BUTTON_STATE_ON);
+			else if (state == BUTTON_STATE_ON)
+				ButtonWidget_SetButtonState(button, BUTTON_STATE_OFF);
+
+			//run the handler function
+
+			//function pointer:
+			//void (*buttonHandler)(void);	//function to run
+
+			//fuunction declaration
+			//btnFunction1
+			//calling the handler:
+			//(*button.buttonHandler)();
+
+			(*button.buttonHandler)();
 		}
 	}
 

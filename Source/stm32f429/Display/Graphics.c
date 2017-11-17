@@ -14,7 +14,6 @@ change the color depth to 16bits, or compact the frame buffer
 into two pixels per write, and do a read/mod/write to put
 a single pixel.
 
-
 */
 
 #include <stdlib.h>
@@ -219,7 +218,7 @@ uint8_t LCD_GetRGB332PalletValue(uint16_t color)
 //in half if the layer used the top and bottom bytes
 //
 //
-void LCD_Clear(uint8_t layer, uint16_t color)
+void LCD_Clear(uint32_t layer, uint16_t color)
 {
 	//get the 8 bit color value from the 16 bit value
 	uint8_t color8 = LCD_GetRGB332PalletValue(color);
@@ -243,7 +242,7 @@ void LCD_Clear(uint8_t layer, uint16_t color)
 //need to do a read/mod/write in order to avoid writing
 //dead/unknown data.
 //
-void LCD_PutPixel(uint8_t layer, uint16_t x, uint16_t y, uint16_t color)
+void LCD_PutPixel(uint32_t layer, uint32_t x, uint32_t y, uint16_t color)
 {
     //do simple test for x and y in range
     if ((x < 0) || (x > LCD_WIDTH-1))
@@ -256,9 +255,9 @@ void LCD_PutPixel(uint8_t layer, uint16_t x, uint16_t y, uint16_t color)
 
     //each of these correspond to a number of elements
     //counted from the top element
-    uint16_t rowOffset = y * LCD_WIDTH;
-    uint16_t colOffset = x; 
-    uint16_t cell = rowOffset + colOffset;
+    uint32_t rowOffset = y * LCD_WIDTH;
+    uint32_t colOffset = x;
+    uint32_t cell = rowOffset + colOffset;
 
     //read one up for or-ing to the current at the msb
     volatile uint32_t oneUp = *(__IO uint32_t*) (SDRAM_BASE_ADDR + SDRAM_LCD_LAYER_OFFSET +
@@ -272,7 +271,7 @@ void LCD_PutPixel(uint8_t layer, uint16_t x, uint16_t y, uint16_t color)
 //////////////////////////////////////////////
 //Breshman's eq.
 //
-void LCD_DrawLine(uint8_t layer, int x0, int y0, int x1, int y1, uint16_t color)
+void LCD_DrawLine(uint32_t layer, int x0, int y0, int x1, int y1, uint16_t color)
 {
 
 	int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
@@ -296,7 +295,7 @@ void LCD_DrawLine(uint8_t layer, int x0, int y0, int x1, int y1, uint16_t color)
 //length and radius.  Uses angle lookup table
 //to compute sin/cos.
 //
-void LCD_DrawRadius(uint8_t layer, int x0, int y0, int length, int angle, uint16_t color)
+void LCD_DrawRadius(uint32_t layer, int x0, int y0, int length, int angle, uint16_t color)
 {
 	float dx_length, dy_length;
 
@@ -389,7 +388,28 @@ void LCD_RotateBuffer(uint32_t sourceLayer, uint32_t destinationLayer, uint16_t 
 
 
 
+/////////////////////////////////////////////////
+//Draw filled box on layer
+//all x and y are zero-based
+void LCD_DrawBox(uint32_t layer, uint32_t x0, uint32_t y0, uint32_t sizeX, uint32_t sizeY, uint16_t color)
+{
+	uint32_t xStop = x0 + sizeX;
+	uint32_t yStop = y0 + sizeY;
+	uint32_t i, j;
 
+	if (xStop >= LCD_WIDTH)
+		xStop = LCD_WIDTH - 1;
+	if (yStop >= LCD_HEIGHT)
+		yStop = LCD_HEIGHT - 1;
+
+	for (i = y0 ; i < yStop ; i++)
+	{
+		for (j = x0 ; j < xStop ; j++)
+		{
+			LCD_PutPixel(layer, j, i, color);
+		}
+	}
+}
 
 ////////////////////////////////////////////////////////////
 //LCD Text Functions

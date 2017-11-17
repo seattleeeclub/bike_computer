@@ -24,8 +24,8 @@ Layer addresses defined in Memory.h
 /* Includes ------------------------------------------------------------------*/
 
 
-#define LCD_HEIGHT				320
-#define LCD_WIDTH				240
+#define LCD_HEIGHT				((uint32_t)320)
+#define LCD_WIDTH				((uint32_t)240)
 #define DISP_ORIENTATION		0
 #define CHAR_HEIGHT				24
 #define CHAR_WIDTH				16
@@ -80,11 +80,14 @@ uint16_t LCD_GetTextLineColor(void);
 uint16_t LCD_GetTextBackColor(void);
 
 uint8_t LCD_GetRGB332PalletValue(uint16_t color);
-void LCD_Clear(uint8_t layer, uint16_t color);
-void LCD_PutPixel(uint8_t layer, uint16_t x, uint16_t y, uint16_t color);       //sets bit low at x,y
-void LCD_DrawLine(uint8_t layer, int x0, int y0, int x1, int y1, uint16_t color);
-void LCD_DrawRadius(uint8_t layer, int x0, int y0, int length, int angle, uint16_t color);
+void LCD_Clear(uint32_t layer, uint16_t color);
+void LCD_PutPixel(uint32_t layer, uint32_t x, uint32_t y, uint16_t color);
+void LCD_DrawLine(uint32_t layer, int x0, int y0, int x1, int y1, uint16_t color);
+void LCD_DrawRadius(uint32_t layer, int x0, int y0, int length, int angle, uint16_t color);
 void LCD_RotateBuffer(uint32_t sourceLayer, uint32_t destinationLayer, uint16_t angle, int xc, int yc);
+
+void LCD_DrawBox(uint32_t layer, uint32_t x0, uint32_t y0, uint32_t sizeX, uint32_t sizeY, uint16_t color);
+
 
 //text functions - 16x24 characters
 void LCD_DrawChar(uint8_t layer, uint8_t row, uint8_t col, uint8_t letter);

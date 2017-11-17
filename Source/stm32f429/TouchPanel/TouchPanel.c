@@ -87,7 +87,12 @@ void TouchPanel_init(void)
 //	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x09);
 
 	//2 samples 01, det delay 50us 001, settling 100us 001, 01001001
-	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x49);
+//	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x49);
+
+	//increase the delay and settling time....
+	//
+	//2 samples 01, det delay 1ms = 100  , settling 1ms = 011....  01100011
+	TouchPanel_writeReg1Byte(TP_REG_TSC_CFG, 0x63);
 
 	//configure the fifo - fifo 2, two elements in the fifo to trigger
 	TouchPanel_writeReg1Byte(TP_REG_TSC_FIFO_TH, 0x02);
@@ -286,6 +291,11 @@ TouchPanelData TouchPanel_readRawData(void)
 }
 
 
+////////////////////////////////////////
+//return the current touch location on the panel.
+//m_touchPanelData is updated in the isr, gpio exti
+//line interrupt.
+//
 TouchPanelData TouchPanel_getPosition(void)
 {
 	return m_touchPanelData;
@@ -358,7 +368,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		//(*button.buttonHandler)();
         //post the message
         xQueueSendFromISR(PanelQueue, &button, &xHigherPriorityTaskWoken);
-
 
 	}
 
